@@ -12,42 +12,25 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.apache.poi.ss.usermodel.CellType.NUMERIC;
-import static org.apache.poi.ss.usermodel.CellType.STRING;
+import static org.apache.poi.ss.usermodel.CellType.*;
 
 public class ReadExcel {
 
-    private final static String defaultDateFormat = "yyyy-MM-dd";
-
-    public static @NotNull
-    <T> List<T> getObjects(Workbook workbook, Class<T> objectClass) {
+    public static @NotNull <T> List<T> getObjects(Workbook workbook, Class<T> objectClass) {
         return getObjects(workbook, objectClass, 0);
     }
 
-    public static @NotNull
-    <T> List<T> getObjects(Workbook workbook, Class<T> objectClass, Integer sheetIndex) {
-        return getObjects(workbook, objectClass, sheetIndex, defaultDateFormat);
-    }
-
-    public static @NotNull
-    <T> List<T> getObjects(Workbook workbook, Class<T> objectClass, String sheetName) {
-        return getObjects(workbook, objectClass, sheetName, defaultDateFormat);
-    }
-
-    public static @NotNull
-    <T> List<T> getObjects(Workbook workbook, Class<T> objectClass, Integer sheetIndex, String dateFormat) {
+    public static @NotNull <T> List<T> getObjects(Workbook workbook, Class<T> objectClass, Integer sheetIndex) {
         Sheet sheet = workbook.getSheetAt(sheetIndex);
-        return getObjects(sheet, objectClass, dateFormat);
+        return getObjects(sheet, objectClass);
     }
 
-    public static @NotNull
-    <T> List<T> getObjects(Workbook workbook, Class<T> objectClass, String sheetName, String dataFormat) {
+    public static @NotNull <T> List<T> getObjects(Workbook workbook, Class<T> objectClass, String sheetName) {
         Sheet sheet = workbook.getSheet(sheetName);
-        return getObjects(sheet, objectClass, dataFormat);
+        return getObjects(sheet, objectClass);
     }
 
-    public static @NotNull
-    <T> List<T> getObjects(Sheet sheet, Class<T> objectClass, String dateFormat) {
+    public static @NotNull <T> List<T> getObjects(Sheet sheet, Class<T> objectClass) {
         List<T> result = new LinkedList<>();
 
         int cowNum = sheet.getLastRowNum();
@@ -80,7 +63,7 @@ public class ReadExcel {
                 if (Objects.isNull(row)) {
                     break;
                 }
-                T object = mapRowToObject(objectClass, row, header, dateFormat);
+                T object = mapRowToObject(objectClass, row, header);
                 if (object == null) {
                     break;
                 }
@@ -96,7 +79,7 @@ public class ReadExcel {
         }
     }
 
-    private static <T> T mapRowToObject(Class<T> objectClass, @NotNull Row row, SheetHeader sheetHeader, String dateFormat) throws Exception {
+    private static <T> T mapRowToObject(Class<T> objectClass, @NotNull Row row, SheetHeader sheetHeader) throws Exception {
         if (!objectClass.isAnnotationPresent(ExcelSheet.class)) {
             throw new UnsupportedOperationException("Only the class which has annotation @Sheet can be resolve");
         }
@@ -137,7 +120,8 @@ public class ReadExcel {
             if (cell == null) {
                 continue;
             }
-            setObjectAttribute(field, cell, object, dateFormat, goodAttributeNum);
+            String personalDateFormat = field.getAnnotation(ExcelColumn.class).dateFormat();
+            setObjectAttribute(field, cell, object, personalDateFormat, goodAttributeNum);
         }
 
         // 有效的属性数为0时将会认为该对象无效，强制返回null
@@ -158,6 +142,10 @@ public class ReadExcel {
         boolean isLong = long.class.equals(fieldClass) || Long.class.equals(fieldClass);
         boolean isFloat = float.class.equals(fieldClass) || Float.class.equals(fieldClass);
         boolean isDouble = double.class.equals(fieldClass) || Double.class.equals(fieldClass);
+
+        if (cell.getCellType() == _NONE || cell.getCellType() == BLANK) {
+            return;
+        }
 
         if (cell.getCellType() == STRING) {
             String preValue = cell.getStringCellValue();

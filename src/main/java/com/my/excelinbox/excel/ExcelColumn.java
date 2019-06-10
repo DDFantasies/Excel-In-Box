@@ -12,4 +12,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface ExcelColumn {
     //列名，未填写则使用属性名，同一excel文件中不可重复出现
     String value() default "";
+    String dateFormat() default "yyyy/MM/dd";
 }

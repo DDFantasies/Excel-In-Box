@@ -22,26 +22,24 @@ import static com.my.excelinbox.excel.ExcelVersion.XLS;
 import static com.my.excelinbox.excel.ExcelVersion.XLSX;
 
 public class WriteExcel {
+
     private final static String defaultDateFormat = "yyyy-MM-dd";
 
-    public static @NotNull
-    byte[] write(@NotNull List<?> objects){
-        try(ByteArrayOutputStream out = new ByteArrayOutputStream()){
+    public static @NotNull byte[] write(@NotNull List<?> objects) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Workbook wb = WriteExcel.setObjects(objects);
             wb.write(out);
             return out.toByteArray();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException("fail to writing excel:" + ex.getLocalizedMessage(), ex);
         }
     }
 
-    public static @NotNull
-    Workbook setObjects(@NotNull List<?> objects) {
+    public static @NotNull Workbook setObjects(@NotNull List<?> objects) {
         return setObjects(objects, XLSX, defaultDateFormat);
     }
 
-    public static @NotNull
-    Workbook setObjects(@NotNull List<?> objects, @NotNull ExcelVersion version, @NotNull String dateFormat) {
+    public static @NotNull Workbook setObjects(@NotNull List<?> objects, @NotNull ExcelVersion version, @NotNull String dateFormat) {
         if (CollectionUtils.isEmpty(objects)) {
             return emptyWorkBook(version);
         }
@@ -98,16 +96,15 @@ public class WriteExcel {
             Field field = fields.get(i);
             field.setAccessible(true);
             Object value = field.get(object);
-            if (value == null){
+            if (value == null) {
                 cell.setCellValue("");
-            }else {
+            } else {
                 cell.setCellValue(value.toString());
             }
         }
     }
 
-    private static @NotNull
-    Workbook emptyWorkBook(@NotNull ExcelVersion version) {
+    private static @NotNull Workbook emptyWorkBook(@NotNull ExcelVersion version) {
         if (XLS.equals(version)) {
             return new HSSFWorkbook();
         } else {

@@ -14,5 +14,4 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Inherited
 //标记excel实体类
 public @interface ExcelSheet {
-    String name() default "Sheet1";
 }

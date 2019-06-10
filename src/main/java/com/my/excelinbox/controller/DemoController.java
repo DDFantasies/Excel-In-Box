@@ -12,17 +12,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 
 @Controller
-public class test {
+public class DemoController {
 
+    @Resource
     private ExcelService excelService;
-
-    public test(ExcelService excelService) {
-        this.excelService = excelService;
-    }
 
     @PostMapping("/excel")
     public List<Student> addTrades(@RequestParam("file") MultipartFile multipartFile) {
@@ -46,6 +44,6 @@ public class test {
 
     @GetMapping("/getExcel")
     public ResponseEntity<byte[]> excelDownload() {
-
+        return null;
     }
 }
