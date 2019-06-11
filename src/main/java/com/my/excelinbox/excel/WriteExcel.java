@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,8 +23,6 @@ import static com.my.excelinbox.excel.ExcelVersion.XLS;
 import static com.my.excelinbox.excel.ExcelVersion.XLSX;
 
 public class WriteExcel {
-
-    private final static String defaultDateFormat = "yyyy-MM-dd";
 
     public static @NotNull byte[] write(@NotNull List<?> objects) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
@@ -36,10 +35,10 @@ public class WriteExcel {
     }
 
     public static @NotNull Workbook setObjects(@NotNull List<?> objects) {
-        return setObjects(objects, XLSX, defaultDateFormat);
+        return setObjects(objects, XLSX);
     }
 
-    public static @NotNull Workbook setObjects(@NotNull List<?> objects, @NotNull ExcelVersion version, @NotNull String dateFormat) {
+    public static @NotNull Workbook setObjects(@NotNull List<?> objects, @NotNull ExcelVersion version) {
         if (CollectionUtils.isEmpty(objects)) {
             return emptyWorkBook(version);
         }
@@ -73,11 +72,10 @@ public class WriteExcel {
             nameCell.setCellValue(headerName);
         }
 
-        DateFormat defaultDateFormat = new SimpleDateFormat(dateFormat);
         for (int j = 1; j <= objects.size(); j++) {
             Row row = sheet.createRow(j);
             try {
-                mapObjectToRow(objects.get(j - 1), row, fields, defaultDateFormat);
+                mapObjectToRow(objects.get(j - 1), row, fields);
             } catch (Exception ex) {
                 RuntimeException excelException = new RuntimeException("Error in mapping excel: " + ex.getMessage());
                 excelException.setStackTrace(ex.getStackTrace());
@@ -89,7 +87,7 @@ public class WriteExcel {
         return workbook;
     }
 
-    private static void mapObjectToRow(@NotNull Object object, Row row, List<Field> fields, DateFormat dateFormat) throws Exception {
+    private static void mapObjectToRow(@NotNull Object object, Row row, List<Field> fields) throws Exception {
         for (int i = 0; i < fields.size(); i++) {
             Cell cell = row.createCell(i);
 
@@ -99,7 +97,13 @@ public class WriteExcel {
             if (value == null) {
                 cell.setCellValue("");
             } else {
-                cell.setCellValue(value.toString());
+                if (Date.class.equals(field.getType())) {
+                    Date date = (Date) value;
+                    String dateFormat = field.getAnnotation(ExcelColumn.class).dateFormat();
+                    cell.setCellValue(new SimpleDateFormat(dateFormat).format(date));
+                } else {
+                    cell.setCellValue(value.toString());
+                }
             }
         }
     }
