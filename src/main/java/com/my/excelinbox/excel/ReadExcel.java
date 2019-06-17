@@ -120,8 +120,7 @@ public class ReadExcel {
             if (cell == null) {
                 continue;
             }
-            String personalDateFormat = field.getAnnotation(ExcelColumn.class).dateFormat();
-            setObjectAttribute(field, cell, object, personalDateFormat, goodAttributeNum);
+            setObjectAttribute(field, cell, object, goodAttributeNum);
         }
 
         // 有效的属性数为0时将会认为该对象无效，强制返回null
@@ -132,7 +131,7 @@ public class ReadExcel {
         }
     }
 
-    private static <T> void setObjectAttribute(Field field, Cell cell, T object, String dateFormat, AtomicInteger goodAttributeNum) throws Exception {
+    private static <T> void setObjectAttribute(Field field, Cell cell, T object, AtomicInteger goodAttributeNum) throws Exception {
         Class fieldClass = field.getType();
         field.setAccessible(true);
 
@@ -158,8 +157,7 @@ public class ReadExcel {
             if (String.class.equals(fieldClass)) {
                 field.set(object, preValue);
             } else if (Date.class.equals(fieldClass)) {
-                Date value = new SimpleDateFormat(dateFormat).parse(preValue);
-                field.set(object, value);
+                field.set(object, cell.getDateCellValue());
             } else if (isInt) {
                 Integer value = Integer.valueOf(preValue);
                 field.set(object, value);

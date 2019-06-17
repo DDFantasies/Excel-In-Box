@@ -20,9 +20,6 @@ public class Student {
     @ExcelColumn("出生日期")
     private Date birthday;
 
-    @ExcelColumn(value = "登记时间", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    private Date registerTime;
-
     @ExcelColumn("学费")
     private double fee;
 
@@ -56,14 +53,6 @@ public class Student {
 
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
-    }
-
-    public Date getRegisterTime() {
-        return registerTime;
-    }
-
-    public void setRegisterTime(Date registerTime) {
-        this.registerTime = registerTime;
     }
 
     public double getFee() {

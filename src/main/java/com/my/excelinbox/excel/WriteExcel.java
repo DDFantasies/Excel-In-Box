@@ -98,9 +98,7 @@ public class WriteExcel {
                 cell.setCellValue("");
             } else {
                 if (Date.class.equals(field.getType())) {
-                    Date date = (Date) value;
-                    String dateFormat = field.getAnnotation(ExcelColumn.class).dateFormat();
-                    cell.setCellValue(new SimpleDateFormat(dateFormat).format(date));
+                    cell.setCellValue((Date) value);
                 } else {
                     cell.setCellValue(value.toString());
                 }
