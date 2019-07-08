@@ -1,6 +1,15 @@
 package com.my.excelinbox.excel;
 
+/**
+ * @author fengran
+ */
 public enum ExcelVersion {
-    XLS,//for excel2003
-    XLSX//for excel2007 and higher versions
+    /**
+     * for excel2003
+     */
+    XLS,
+    /**
+     * or excel2007 and higher versions
+     */
+    XLSX
 }

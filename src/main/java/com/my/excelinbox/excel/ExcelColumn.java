@@ -6,6 +6,9 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+/**
+ * @author fengran
+ */
 @Target({FIELD})
 @Retention(RUNTIME)
 //标记实体属性对应的的excel列名

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * @author fengran
+ */
 public class SheetHeader {
     private Map<Integer, String> headerName;
     private Map<String, Integer> headerIndex;

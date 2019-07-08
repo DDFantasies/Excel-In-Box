@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 import static com.my.excelinbox.excel.ExcelVersion.XLS;
 import static com.my.excelinbox.excel.ExcelVersion.XLSX;
 
+/**
+ * @author fengran
+ */
 public class WriteExcel {
 
     public static @NotNull byte[] write(@NotNull List<?> objects) {

@@ -85,7 +85,7 @@ public class ReadExcel {
         }
 
         //<Excel列名, 实体属性>, 若列名未填写则使用属性名
-        HashMap<String, Field> fieldMap = new HashMap<>();
+        HashMap<String, Field> fieldMap = new HashMap<>(10);
         Arrays.stream(objectClass.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(ExcelColumn.class))
                 .peek(field -> field.setAccessible(true))
@@ -148,7 +148,7 @@ public class ReadExcel {
 
         if (cell.getCellType() == STRING) {
             String preValue = cell.getStringCellValue();
-            if (preValue == null || preValue.equals("")) {
+            if (preValue == null || "".equals(preValue)) {
                 return;
             } else {
                 goodAttributeNum.incrementAndGet();
@@ -178,7 +178,7 @@ public class ReadExcel {
 
         if (cell.getCellType() == NUMERIC) {
             Double preValue = cell.getNumericCellValue();
-            if (!preValue.equals(0.00)) {
+            if (!preValue.equals(Double.NaN)) {
                 goodAttributeNum.incrementAndGet();
             }
 
