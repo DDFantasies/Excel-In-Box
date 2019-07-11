@@ -41,7 +41,7 @@ public class SheetHeader {
         return headerName.keySet();
     }
 
-    public int size(){
+    public int size() {
         return headerName.size();
     }
 }

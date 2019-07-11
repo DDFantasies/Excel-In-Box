@@ -22,17 +22,17 @@ import static org.apache.poi.ss.usermodel.CellType.*;
 public class ReadExcel {
 
     public static @NotNull <T> List<T> getObjectsFromXLS(InputStream is, Class<T> objectClass) {
-        try (InputStream excelIs = is){
+        try (InputStream excelIs = is) {
             return getObjects(new HSSFWorkbook(excelIs), objectClass, 0);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
     public static @NotNull <T> List<T> getObjectsFromXLSX(InputStream is, Class<T> objectClass) {
-        try (InputStream excelIs = is){
+        try (InputStream excelIs = is) {
             return getObjects(new XSSFWorkbook(excelIs), objectClass, 0);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
