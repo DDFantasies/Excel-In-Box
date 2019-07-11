@@ -2,6 +2,7 @@ package com.my.excelinbox.demo;
 
 import com.my.excelinbox.excel.WriteExcel;
 
+import java.io.File;
 import java.io.FileOutputStream;
 
 import java.util.Collections;
@@ -20,7 +21,7 @@ public class WriteDemo {
         student.setFee(1500.58);
 
         byte[] result = WriteExcel.write(Collections.singletonList(student));
-        try(FileOutputStream fos = new FileOutputStream("/test.xlsx")){
+        try(FileOutputStream fos = new FileOutputStream("./test.xlsx")){
             fos.write(result);
         }catch (Exception ex){
             ex.printStackTrace();

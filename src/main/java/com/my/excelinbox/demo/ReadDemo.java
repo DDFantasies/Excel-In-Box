@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ReadDemo {
     public static void main(String[] args) {
-        try(InputStream is = ReadDemo.class.getResourceAsStream("/application.yml")){
+        try(InputStream is = ReadDemo.class.getResourceAsStream("/students.xlsx")){
             List<Student> students = ReadExcel.getObjectsFromXLSX(is, Student.class);
             ObjectMapper mapper = new ObjectMapper();
             System.out.println(mapper.writeValueAsString(students));

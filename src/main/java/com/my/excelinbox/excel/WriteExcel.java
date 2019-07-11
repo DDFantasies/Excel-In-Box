@@ -3,10 +3,7 @@ package com.my.excelinbox.excel;
 import io.netty.util.internal.StringUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,7 +73,7 @@ public class WriteExcel {
         for (int j = 1; j <= objects.size(); j++) {
             Row row = sheet.createRow(j);
             try {
-                mapObjectToRow(objects.get(j - 1), row, fields);
+                mapObjectToRow(objects.get(j - 1), workbook, row, fields);
             } catch (Exception ex) {
                 RuntimeException excelException = new RuntimeException("Error in mapping excel: " + ex.getMessage());
                 excelException.setStackTrace(ex.getStackTrace());
@@ -88,7 +85,7 @@ public class WriteExcel {
         return workbook;
     }
 
-    private static void mapObjectToRow(@NotNull Object object, Row row, List<Field> fields) throws Exception {
+    private static void mapObjectToRow(@NotNull Object object, Workbook workbook, Row row, List<Field> fields) throws Exception {
         for (int i = 0; i < fields.size(); i++) {
             Cell cell = row.createCell(i);
 
@@ -99,6 +96,13 @@ public class WriteExcel {
                 cell.setCellValue("");
             } else {
                 if (Date.class.equals(field.getType())) {
+                    CellStyle cellStyle = workbook.createCellStyle();
+                    CreationHelper creationHelper = workbook.getCreationHelper();
+
+                    String dateFormat = field.getAnnotation(ExcelColumn.class).dateFormat();
+                    cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat(dateFormat));
+
+                    cell.setCellStyle(cellStyle);
                     cell.setCellValue((Date) value);
                 } else {
                     cell.setCellValue(value.toString());
