@@ -1,19 +1,41 @@
 package com.my.excelinbox.excel;
 
 import io.netty.util.internal.StringUtil;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Predicate;
 
 import static org.apache.poi.ss.usermodel.CellType.*;
 
+/**
+ * @author fengran
+ */
 public class ReadExcel {
+
+    public static @NotNull <T> List<T> getObjectsFromXLS(InputStream is, Class<T> objectClass) {
+        try (InputStream excelIs = is){
+            return getObjects(new HSSFWorkbook(excelIs), objectClass, 0);
+        }catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static @NotNull <T> List<T> getObjectsFromXLSX(InputStream is, Class<T> objectClass) {
+        try (InputStream excelIs = is){
+            return getObjects(new XSSFWorkbook(excelIs), objectClass, 0);
+        }catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
 
     public static @NotNull <T> List<T> getObjects(Workbook workbook, Class<T> objectClass) {
         return getObjects(workbook, objectClass, 0);
@@ -29,7 +51,7 @@ public class ReadExcel {
         return getObjects(sheet, objectClass);
     }
 
-    public static @NotNull <T> List<T> getObjects(Sheet sheet, Class<T> objectClass) {
+    private static @NotNull <T> List<T> getObjects(Sheet sheet, Class<T> objectClass) {
         List<T> result = new LinkedList<>();
 
         int cowNum = sheet.getLastRowNum();
@@ -63,6 +85,7 @@ public class ReadExcel {
                     break;
                 }
                 T object = mapRowToObject(objectClass, row, header);
+                //存在空白行则直接结束
                 if (object == null) {
                     break;
                 }
