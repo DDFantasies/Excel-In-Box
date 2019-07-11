@@ -8,9 +8,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import static org.apache.poi.ss.usermodel.CellType.*;
 
@@ -57,7 +56,7 @@ public class ReadExcel {
         SheetHeader header = new SheetHeader(headerMap);
 
         try {
-            //sheet.getLastRowNum()可能大于实际行数，以ExcelId为准
+            //sheet.getLastRowNum()可能大于实际行数
             for (int j = 1; j <= sheet.getLastRowNum(); j++) {
                 Row row = sheet.getRow(j);
                 if (Objects.isNull(row)) {
@@ -67,10 +66,8 @@ public class ReadExcel {
                 if (object == null) {
                     break;
                 }
-
                 result.add(object);
             }
-
             return result;
         } catch (Exception ex) {
             RuntimeException excelException = new RuntimeException("Error in mapping excel: " + ex.getMessage());
@@ -106,8 +103,7 @@ public class ReadExcel {
 
         // 有效的属性数
         // {null,"", 0, 0.00} 均会被认为无效值
-        AtomicInteger goodAttributeNum = new AtomicInteger(0);
-
+        int goodAttributeNum = 0;
         for (int i = 0; i < sheetHeader.size(); i++) {
             String columnName = sheetHeader.getColumnName(i);
 
@@ -120,57 +116,56 @@ public class ReadExcel {
             if (cell == null) {
                 continue;
             }
-            setObjectAttribute(field, cell, object, goodAttributeNum);
+            goodAttributeNum = setObjectAttribute(field, cell, object, goodAttributeNum);
         }
 
         // 有效的属性数为0时将会认为该对象无效，强制返回null
-        if (goodAttributeNum.get() == 0) {
+        if (goodAttributeNum == 0) {
             return null;
         } else {
             return object;
         }
     }
 
-    private static <T> void setObjectAttribute(Field field, Cell cell, T object, AtomicInteger goodAttributeNum) throws Exception {
+    private static Predicate<Class> isInt = c -> int.class.equals(c) || Integer.class.equals(c);
+    private static Predicate<Class> isShort = c -> short.class.equals(c) || Short.class.equals(c);
+    private static Predicate<Class> isLong = c -> long.class.equals(c) || Long.class.equals(c);
+    private static Predicate<Class> isFloat = c -> float.class.equals(c) || Float.class.equals(c);
+    private static Predicate<Class> isDouble = c -> double.class.equals(c) || Double.class.equals(c);
+
+    private static <T> int setObjectAttribute(Field field, Cell cell, T object, Integer goodAttributeNum) throws Exception {
         Class fieldClass = field.getType();
         field.setAccessible(true);
 
-        //这里写的好垃圾啊，然而没想到怎么改进
-        boolean isInt = int.class.equals(fieldClass) || Integer.class.equals(fieldClass);
-        boolean isShort = short.class.equals(fieldClass) || Short.class.equals(fieldClass);
-        boolean isLong = long.class.equals(fieldClass) || Long.class.equals(fieldClass);
-        boolean isFloat = float.class.equals(fieldClass) || Float.class.equals(fieldClass);
-        boolean isDouble = double.class.equals(fieldClass) || Double.class.equals(fieldClass);
-
         if (cell.getCellType() == _NONE || cell.getCellType() == BLANK) {
-            return;
+            return goodAttributeNum;
         }
 
         if (cell.getCellType() == STRING) {
             String preValue = cell.getStringCellValue();
             if (preValue == null || "".equals(preValue)) {
-                return;
+                return goodAttributeNum;
             } else {
-                goodAttributeNum.incrementAndGet();
+                goodAttributeNum++;
             }
 
             if (String.class.equals(fieldClass)) {
                 field.set(object, preValue);
             } else if (Date.class.equals(fieldClass)) {
                 field.set(object, cell.getDateCellValue());
-            } else if (isInt) {
+            } else if (isInt.test(fieldClass)) {
                 Integer value = Integer.valueOf(preValue);
                 field.set(object, value);
-            } else if (isShort) {
+            } else if (isShort.test(fieldClass)) {
                 Short value = Short.valueOf(preValue);
                 field.set(object, value);
-            } else if (isLong) {
+            } else if (isLong.test(fieldClass)) {
                 Long value = Long.valueOf(preValue);
                 field.set(object, value);
-            } else if (isFloat) {
+            } else if (isFloat.test(fieldClass)) {
                 Float value = Float.valueOf(preValue);
                 field.set(object, value);
-            } else if (isDouble) {
+            } else if (isDouble.test(fieldClass)) {
                 Double value = Double.valueOf(preValue);
                 field.set(object, value);
             }
@@ -179,28 +174,29 @@ public class ReadExcel {
         if (cell.getCellType() == NUMERIC) {
             Double preValue = cell.getNumericCellValue();
             if (!preValue.equals(Double.NaN)) {
-                goodAttributeNum.incrementAndGet();
+                goodAttributeNum++;
             }
 
             if (String.class.equals(fieldClass)) {
                 String value = String.valueOf(preValue.intValue());
                 field.set(object, value);
-            } else if (isInt) {
+            } else if (isInt.test(fieldClass)) {
                 Integer value = preValue.intValue();
                 field.set(object, value);
-            } else if (isShort) {
+            } else if (isShort.test(fieldClass)) {
                 Short value = preValue.shortValue();
                 field.set(object, value);
-            } else if (isLong) {
+            } else if (isLong.test(fieldClass)) {
                 Long value = preValue.longValue();
                 field.set(object, value);
-            } else if (isFloat) {
+            } else if (isFloat.test(fieldClass)) {
                 Float value = preValue.floatValue();
                 field.set(object, value);
-            } else if (isDouble) {
+            } else if (isDouble.test(fieldClass)) {
                 field.set(object, preValue);
             }
         }
 
+        return goodAttributeNum;
     }
 }

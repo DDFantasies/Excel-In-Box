@@ -9,7 +9,7 @@ public enum ExcelVersion {
      */
     XLS,
     /**
-     * or excel2007 and higher versions
+     * for excel2007 and higher versions
      */
     XLSX
 }
